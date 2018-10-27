@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/r-donat-chart.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet"> 
+    <style>
+       
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+          background:#444
+        }
+
+        #container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+          left:calc(50% - 70px);
+          font-size:12px;
+          color:#ccc;
+          margin-top:100px;
+        }
+input{
+  margin-top:30px;
+  width:40px;
+  margin-left:calc(50% - 20px);
+  background:none;
+  color:#fff;
+  border:none;
+  border-bottom:1px solid;
+  text-align:center;
+}
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <input type="number" min="0" max="100" value="50">
+    <script>
+        var A = new rDonatChart({
+  container: "#container",
+  value: 50,
+  fillColor: "orange",
+  emptyColor: "#333",
+  fontColor: "#aaa",
+  thickness: 5,
+  fontSize: 16,
+  //showValue:false,
+  unit: "%"
+});
+
+$("input").bind("input",function(e){
+  var value = $(e.target).val();
+  A.update(value);
+})
+    </script>
+</body>
+
+</html>
