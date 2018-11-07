@@ -6,10 +6,13 @@ function rDonatChart(config) {
         init: function (config) {
             this.updateState(config);
             this.state.value = this.getValue(this.state.value);
-            var range = this.state.end - this.state.start;
-            this.speed = Math.pow(range / 1600, -1);
+            this.setSpeed();
             this.currentValue = this.state.start;
             this.render();
+        },
+        setSpeed:function(){
+            var range = this.state.end - this.state.start;
+            this.speed = Math.pow(range / 1600, -1);
         },
         updateState: function (obj) {
             for (var prop in obj) { 
@@ -68,16 +71,22 @@ function rDonatChart(config) {
             },
             setText: function (text) {
                 text = this.state.text === undefined ? text : this.state.text;
+                if (text === undefined) { return;}
                 this.state.container.find("div").html(text);
             },
+            updateOther:function(obj){
+                a.state.start = obj.start === undefined ? a.state.start : obj.start;
+                a.state.end = obj.end === undefined ? a.state.end : obj.end;
+                a.state.unit = obj.unit || a.state.unit;
+                a.state.fillColor = obj.fillColor || a.state.fillColor;
+                a.state.emptyColor = obj.emptyColor || a.state.emptyColor;
+                a.state.thickness = obj.thickness || a.state.thickness;
+                a.setSpeed();
+            },
             update: function (obj) {
-                if (obj.value === undefined) {
-                    if (obj.text) {
-                        a.setText(obj.text);
-                    }
-                    return;
-                }
+                a.updateOther(obj);
                 clearInterval(a.interval);
+                obj.value = obj.value === undefined ? a.state.value : obj.value;
                 var value = a.getValue(obj.value),
                 animatedValue = a.currentValue,
                 sign = Math.sign(value - a.currentValue);
@@ -88,7 +97,7 @@ function rDonatChart(config) {
                         return;
                     }
                     if (animatedValue < value && sign < 0) {
-                        if (obj.text !== undefined) { a.setText(obj.text); }
+                        if (obj.text!==undefined) { a.setText(obj.text); }
                         clearInterval(a.interval);
                         return;
                     }
