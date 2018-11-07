@@ -83,12 +83,12 @@ function rDonatChart(config) {
                 sign = Math.sign(value - a.currentValue);
                 a.interval = setInterval(function () {
                     if (animatedValue > value && sign > 0) {
-                        if (obj.text) { a.setText(obj.text);}
+                        if (obj.text !== undefined) { a.setText(obj.text); }
                         clearInterval(a.interval);
                         return;
                     }
                     if (animatedValue < value && sign < 0) {
-                        if (obj.text) { a.setText(obj.text); }
+                        if (obj.text !== undefined) { a.setText(obj.text); }
                         clearInterval(a.interval);
                         return;
                     }
