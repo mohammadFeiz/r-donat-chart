@@ -5,6 +5,9 @@ function rDonatChart(config) {
         interval: null,
         init: function (config) {
             this.updateState(config);
+            this.state.value = this.getValue(this.state.value);
+            var range = this.state.end - this.state.start;
+            this.speed = Math.pow(range / 1600, -1);
             this.currentValue = this.state.start;
             this.render();
         },
@@ -19,7 +22,7 @@ function rDonatChart(config) {
             container.html(CanvasChart({size: size}));
             var ct = this.state.ct = this.state.container.find("canvas")[0],
             ctx = this.state.ctx = ct.getContext("2d");
-            this.update(this.state.value);
+            this.update({value:this.state.value,text:this.state.text});
         },
         drawEmpty: function () {
             var size = this.state.size,
@@ -51,13 +54,8 @@ function rDonatChart(config) {
                 ctx.stroke();
                 ctx.closePath();
             },
-            drawValue: function () {
-                if (this.state.showValue !== false) {
-                    this.state.container.find("div").html(this.state.value + (this.state.unit || "%"));
-                }
-            },
-            setText:function(text){
-                a.state.container.find("div").html(text);
+            getTemplate:function(){
+                return a.state.container.find("div").html();
             },
             clear:function(){
                 this.state.ctx.clearRect(0, 0, this.state.size, this.state.size);
@@ -68,45 +66,60 @@ function rDonatChart(config) {
                 else if (value > this.state.end) { value = this.state.end; }
                 return value;
             },
-            update: function (val) {clearInterval(a.interval);
-                var value = a.getValue(val),
+            setText: function (text) {
+                text = this.state.text === undefined ? text : this.state.text;
+                this.state.container.find("div").html(text);
+            },
+            update: function (obj) {
+                if (obj.value === undefined) {
+                    if (obj.text) {
+                        a.setText(obj.text);
+                    }
+                    return;
+                }
+                clearInterval(a.interval);
+                var value = a.getValue(obj.value),
                 animatedValue = a.currentValue,
                 sign = Math.sign(value - a.currentValue);
-                if (sign === 0) { return; }
                 a.interval = setInterval(function () {
                     if (animatedValue > value && sign > 0) {
+                        if (obj.text) { a.setText(obj.text);}
                         clearInterval(a.interval);
                         return;
                     }
                     if (animatedValue < value && sign < 0) {
+                        if (obj.text) { a.setText(obj.text); }
                         clearInterval(a.interval);
                         return;
                     }
                     a.currentValue = animatedValue;
-                    a.redraw(animatedValue);
-                    animatedValue+=sign;
-                }, 20);
+                    a.state.value = animatedValue;
+                    a.redraw();
+                    if (sign === 0) {
+                        if (obj.text!==undefined) { a.setText(obj.text); }
+                        clearInterval(a.interval);
+                        return;
+                    }
+                    animatedValue += sign;
+                }, a.speed);
             },
             redraw: function (value) {
-                this.state.value = value;
                 this.clear();
                 this.drawEmpty(); 
                 this.drawFill(value); 
-                this.drawValue(value);
+                this.setText(this.state.value + (this.state.unit || ""));  
             }
         };
         a.init(config);
         return {
             update:a.update,
-            setText:a.setText
         };
     }
     function CanvasChart(props) {
         var size = props.size;
         function getStyle() {
             var str = '';
-            str += 'overflow:hidden;position:absolute;';
-            str += 'width:100%;height:100%;left:0;top:0;';
+            str += 'overflow:hidden;position:absolute;width:100%;height:100%;left:0;top:0;';
             str += 'text-align:center;line-height:' + size + 'px;';
             return str;
         }
